@@ -7,12 +7,6 @@ use App\Models\Product;
 
 class HomeController extends BaseController
 {
-	/*protected $view;
-	
-	public function __construct(View $view){
-		$this->view = $view;
-	}*/
-	
 	public function index($request, $response){
 		$getCurrencies = $this->db->table('currency')->get();
 		return $this->view->render($response,'index.twig', ['currencies' => $getCurrencies]);
@@ -21,6 +15,8 @@ class HomeController extends BaseController
 	public function getProduct($request, $response){
 		$product_array = array();
 		$currency_symbol = '';
+		$a = 'id';
+		$b = 'desc';
 		if(!empty($request->getParam('sort_by'))){
 			if($request->getParam('sort_by') == 'low_to_high'){
 				$a = 'product_price';
@@ -31,9 +27,6 @@ class HomeController extends BaseController
 				$a = 'product_price';
 				$b = 'desc';
 			}
-		}else{
-			$a = 'id';
-			$b = 'desc';
 		}
 		if(!empty($request->getParam('category'))){
 			$getProducts = $this->db->table('products')->orderBy($a,$b)->where('product_category',$request->getParam('category'))->get();
@@ -55,6 +48,5 @@ class HomeController extends BaseController
 			}
 		}
 		return $response->withJson($product_array,200);
-		//return $this->view->render($response,'index.twig', ['currencies' => $getProducts]);
 	}
 }
