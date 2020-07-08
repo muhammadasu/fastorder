@@ -1,0 +1,135 @@
+{% extends 'layouts/master.twig' %}
+
+{% block content %}
+<section>
+		<div class="container">
+			<div class="row">
+				<div class="col-sm-3">
+					<div class="left-sidebar">
+						<h2>Category</h2>
+						<div class="panel-group category-products" id="accordian"><!--category-productsr-->
+							<div class="brands-name">
+								<select class="category">
+									<option value="">Select</option>
+									<option value="1">Mens</option>
+									<option value="2">Womens</option>
+								</select>
+							</div>
+						</div><!--/category-products-->
+					
+						<div class="brands_products"><!--brands_products-->
+							<h2>Sort By</h2>
+							<div class="brands-name">
+								<select class="sort_by">
+									<option value="">Select</option>
+									<option value="low_to_high">Price low to high</option>
+									<option value="high_to_low">Price high to low</option>
+								</select>
+							</div>
+						</div><!--/brands_products-->
+					</div>
+				</div>
+				
+				<div class="col-sm-9 padding-right">
+					<div class="features_items"><!--features_items-->
+						
+						
+						
+						
+					</div><!--features_items-->
+				</div>
+			</div>
+		</div>
+	</section>
+	
+	<script>
+		window.currency_rate = 1;
+		window.currency_symbol = 'INR';
+		window.category = '';
+		window.sort_by = '';
+		$(function(){
+			getProduct(window.currency_rate,window.currency_symbol,window.category,window.sort_by);
+		});
+		
+		$(document).on('change','.category',function(){
+			window.category = $(this).val();
+			getProduct(window.currency_rate,window.currency_symbol,window.category,window.sort_by);
+		});
+		
+		$(document).on('change','.sort_by',function(){
+			window.sort_by = $(this).val();
+			getProduct(window.currency_rate,window.currency_symbol,window.category,window.sort_by);
+		});
+		
+		$(document).on('click','.change_currency',function(){
+			var currency = $(this).attr('data-currency');
+			$('.update_currency').html(currency + '<span class="caret"></span>');
+			$.ajax({
+				type: 'GET',
+				dataType : "json",
+				cache : false,
+				url: 'https://api.exchangeratesapi.io/latest?base='+currency,
+				error:function(e){
+					
+				},
+				success: function(data){
+					if(data.rates != ''){
+						$.each(data.rates, function(key, value){
+							if(key == 'INR'){
+								window.currency_rate = value;
+								window.currency_symbol = currency;
+								getProduct(window.currency_rate,window.currency_symbol,window.category,window.sort_by);
+							}
+						});
+					}
+				}
+			});
+		});
+		
+		function getProduct(currency,symbol,category,sort_by){
+			$.ajax({
+				type: 'GET',
+				dataType : "json",
+				cache : false,
+				url: '/get-product?currency='+currency+'&symbol='+symbol+'&category='+category+'&sort_by='+sort_by,
+				error:function(e){
+					
+				},
+				success: function(response){
+					if(response.success == true){
+						$('.features_items').html('<h2 class="title text-center">Features Items</h2>')
+						if(response.data != ''){
+							$.each(response.data,function(key,value){
+								$('.features_items').append('<div class="col-sm-4">'+
+													'<div class="product-image-wrapper">'+
+														'<div class="single-products">'+
+																'<div class="productinfo text-center">'+
+																	'<img src="{{ base_url() }}/upload/'+value.product_image+'" alt="" />'+
+																	'<h2>'+value.currency_symbol+''+value.product_price+'</h2>'+
+																	'<p>'+value.product_name+'</p>'+
+																	'<a href="javascript:void(0);" class="btn btn-default add-to-cart"><i class="fa fa-shopping-cart"></i>Add to cart</a>'+
+																'</div>'+
+																'<div class="product-overlay">'+
+																	'<div class="overlay-content">'+
+																		'<h2>'+value.currency_symbol+''+value.product_price+'</h2>'+
+																		'<p>'+value.product_name+'</p>'+
+																		'<a href="javascript:void(0);" class="btn btn-default add-to-cart"><i class="fa fa-shopping-cart"></i>Add to cart</a>'+
+																	'</div>'+
+																'</div>'+
+														'</div>'+
+														'<div class="choose">'+
+															'<ul class="nav nav-pills nav-justified">'+
+																'<li><a href="javascript:void(0);"><i class="fa fa-plus-square"></i>Add to wishlist</a></li>'+
+																'<li><a href="javascript:void(0);"><i class="fa fa-plus-square"></i>Add to compare</a></li>'+
+															'</ul>'+
+														'</div>'+
+													'</div>'+
+												'</div>');
+							});
+						}
+					}
+				}
+			});
+		}
+	</script>
+{% endblock %}
